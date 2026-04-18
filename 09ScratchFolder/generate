@@ -1,0 +1,114 @@
+Email,Address,Avatar,Avg. Session Length,Time on App,Time on Website,Length of Membership,Yearly Amount Spent
+
+
+{
+"CAPTUREDTIME, username, Email,Address,Avatar,Avg. Session Length,Time on App,Time on Website,Length of Membership,Yearly Amount Spent, membership level
+
+
+
+import json
+import random
+from datetime import datetime
+from faker import Faker
+
+# Initialize Faker
+fake = Faker()
+
+# 1. Generate realistic synthetic data
+def generate_ecommerce_record():
+    # Mean values derived from your sample data
+    avg_session = random.uniform(29.0, 36.0)
+    time_on_app = random.uniform(8.5, 15.5)
+    time_on_website = random.uniform(34.0, 40.0)
+    membership_length = random.uniform(0.5, 6.9)
+    
+    # Calculate a realistic 'Amount Spent' 
+    # Formula mimics a linear regression: Intercept + (Coeff * Feature)
+    yearly_spent = (avg_session * 25) + (time_on_app * 38) + (membership_length * 62) - 800
+    yearly_spent += random.uniform(-20, 20) # Add some noise
+
+    return {
+        "Email": fake.email(),
+        "Address": fake.address().replace('\n', ', '),
+        "Avatar": fake.color_name(),
+        "Avg Session Length": str(avg_session),
+        "Time on App": str(time_on_app),
+        "Time on Website": str(time_on_website),
+        "Length of Membership": str(membership_length),
+        "Yearly Amount Spent": str(max(yearly_spent, 150.0)) # Ensure no negative spend
+    }
+
+# 2. NiFi Integration Logic
+flowFile = session.get()
+if flowFile is None:
+    # If using as a source (e.g. GenerateFlowFile replacement), create one
+    flowFile = session.create()
+
+try:
+    # Create the data
+    data = generate_ecommerce_record()
+    payload = json.dumps(data, indent=2)
+
+    # Write to FlowFile content
+    class ContentCallback(PyOutputStreamCallback):
+        def __init__(self, data):
+            self.data = data
+        def process(self, outputStream):
+            outputStream.write(bytearray(self.data.encode('utf-8')))
+
+    session.write(flowFile, ContentCallback(payload))
+    
+    # Set attributes
+    flowFile = session.putAttribute(flowFile, "filename", "customer_" + str(int(datetime.now().timestamp())) + ".json")
+    flowFile = session.putAttribute(flowFile, "mime.type", "application/json")
+    
+    session.transfer(flowFile, REL_SUCCESS)
+
+except Exception as e:
+    # Log error and route to failure
+    log.error("Error generating data: " + str(e))
+    session.transfer(flowFile, REL_FAILURE)
+
+
+
+
+
+
+# Without Faker - ExecuteScript    **************
+
+import json
+import random
+import uuid
+
+def generate_record():
+    # Hardcoded lists to mimic "Faker"
+    domains = ["gmail.com", "yahoo.com", "hotmail.com", "outlook.com"]
+    avatars = ["Violet", "DarkGreen", "Bisque", "SaddleBrown", "Aqua"]
+    
+    # Generate random email
+    user_id = str(uuid.uuid4())[:8]
+    email = "user_" + user_id + "@" + random.choice(domains)
+    
+    # Generate realistic stats
+    avg_session = round(random.uniform(29.0, 36.0), 4)
+    time_on_app = round(random.uniform(9.0, 15.0), 4)
+    membership = round(random.uniform(0.5, 6.0), 4)
+    
+    # Simple linear logic for spend (Membership * 60 + noise)
+    spent = (membership * 65) + (time_on_app * 30) + random.uniform(50, 150)
+
+    return {
+        "Email": email,
+        "Avatar": random.choice(avatars),
+        "Avg. Session Length": str(avg_session),
+        "Time on App": str(time_on_app),
+        "Length of Membership": str(membership),
+        "Yearly Amount Spent": str(round(spent, 2))
+    }
+
+# NiFi session logic
+flowFile = session.create()
+if flowFile:
+    record = generate_record()
+    flowFile = session.write(flowFile, lambda out: out.write(json.dumps(record).encode('utf-8')))
+    session.transfer(flowFile, REL_SUCCESS)

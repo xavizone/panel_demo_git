@@ -1,0 +1,57 @@
+flowchart TD
+    %% Source Systems
+    subgraph Sources ["1. REAL-TIME SOURCES"]
+        S1["Truck POS (Orders)"]
+        S2["App/Web (Clickstream)"]
+        S3["Customer CRM"]
+    end
+
+    %% Ingestion Layer
+    subgraph Ingest ["2. INGESTION (BRONZE)"]
+        direction TB
+        SP["Snowpipe Streaming v2<br/>(Latency < 1 min)"]
+        subgraph Iceberg ["Iceberg Tables (Managed)"]
+            T1[("RAW_ORDERS")]
+            T2[("RAW_CLICKSTREAM")]
+            T3[("RAW_CUSTOMERS")]
+        end
+    end
+
+    %% Transformation Layer
+    subgraph Trans ["3. TRANSFORMATION (SILVER/GOLD)"]
+        direction TB
+        DT1{{"Dynamic Tables (Silver)<br/>Orders Enriched"}}
+        DT2{{"Dynamic Tables (Gold)<br/>Sales / Customer 360"}}
+        DT3{{"Dynamic Tables (Gold)<br/>Sustainability / Supply Chain"}}
+    end
+
+    %% Governance & DevOps
+    subgraph Gov ["4. GOVERNANCE & DEVOPS"]
+        direction LR
+        TAG[["Horizon Tags<br/>(PII / Confidential)"]]
+        MASK[["Masking & Row Access<br/>(RBAC Enforcement)"]]
+        DQ[["System DMFs<br/>(Null/Duplicate Checks)"]]
+        CLONE[["Zero-Copy Clone<br/>(Dev to Prod Swap)"]]
+    end
+
+    %% Storage
+    subgraph Ext ["5. OPEN STORAGE LAYER"]
+        S3V[("External Volume: AWS S3<br/>(Apache Iceberg / Parquet)")]
+    end
+
+    %% Connection Logic
+    S1 & S2 & S3 --> SP
+    SP --> T1 & T2 & T3
+    T1 & T2 & T3 --> DT1
+    DT1 --> DT2 & DT3
+    
+    %% Governance Overlays
+    T1 & T2 & T3 -.-> DQ
+    T3 -.-> TAG
+    TAG -.-> MASK
+    
+    %% DevOps Line
+    DT2 & DT3 --> CLONE
+    
+    %% Storage Backup
+    T1 & T2 & T3 & DT1 & DT2 & DT3 -.-> S3V

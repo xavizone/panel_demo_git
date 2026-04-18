@@ -1,0 +1,25 @@
+graph LR
+    subgraph Sources ["Ingestion Sources"]
+        A[POS Systems]
+        B[Mobile App]
+        C[Web Clickstream]
+    end
+
+    subgraph Snowflake ["Snowflake Data Cloud (Managed Iceberg)"]
+        D[[Snowpipe Streaming v2]]
+        E[(Iceberg Bronze / Raw)]
+        F[[Dynamic Tables]]
+        G[(Iceberg Silver / Gold)]
+    end
+
+    subgraph Storage ["Open Storage"]
+        H[(AWS S3 / External Volume)]
+    end
+
+    A & B & C --> D
+    D --> E
+    E --> F
+    F --> G
+    E -.-> H
+    G -.-> H
+    G --> I[Streamlit Dashboard]

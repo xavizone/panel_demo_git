@@ -1,3 +1,4 @@
+````
 ```mermaid
 graph LR
     subgraph Sources ["Ingestion Sources"]
@@ -25,3 +26,4 @@ graph LR
     G -.-> H
     G --> I[Streamlit Dashboard]
 ```
+````

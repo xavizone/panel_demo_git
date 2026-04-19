@@ -101,4 +101,4 @@ Example technical architecture
 
 Example business overview
 
-![][08SnowAssets/Panel Instructions/images/image3.jpeg]
+![3][07images/image3.jpeg]

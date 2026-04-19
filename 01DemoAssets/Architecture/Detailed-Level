@@ -1,3 +1,4 @@
+```mermaid
 flowchart TD
     %% Source Systems
     subgraph Sources ["1. REAL-TIME SOURCES"]
@@ -55,3 +56,4 @@ flowchart TD
     
     %% Storage Backup
     T1 & T2 & T3 & DT1 & DT2 & DT3 -.-> S3V
+```

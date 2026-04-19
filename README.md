@@ -71,7 +71,8 @@ It’s up to you on how best to build a presentation flow to highlight your core
 #### **Mock Customer: Tasty Bytes**
 
 You can find many details on who Tasty Bytes is as well as access to data and existing use-cases on the Snowflake Quickstarts website [here](https://quickstarts.snowflake.com/?cat=tasty-bytes).  
-![][08SnowAssets/Panel Instructions/images/image1]
+
+![3](07images/image1.jpeg)
 
 #### **Starting point**
 
@@ -97,8 +98,8 @@ Feel free to add onto/ modify the Tasty Bytes Mission/ Vision, just be sure to s
 
 Example technical architecture
 
-![][08SnowAssets/Panel Instructions/images/image2]
+![3](07images/image2.jpeg)
 
 Example business overview
 
-![3][07images/image3.jpeg]
+![3](07images/image3.jpeg)

@@ -1,3 +1,4 @@
+```mermaid
 graph LR
     subgraph Sources ["Ingestion Sources"]
         A[POS Systems]
@@ -23,3 +24,4 @@ graph LR
     E -.-> H
     G -.-> H
     G --> I[Streamlit Dashboard]
+```
